@@ -12,7 +12,7 @@ export default {
   getApplicationHealth: () => {
     return {
       environment: config.ENV,
-      uptime: `process.uptime().toFixed(2) Second`,
+      uptime: `${process.uptime().toFixed(2)} Second`,
       memoryUsage: {
         heapTotal: `${(process.memoryUsage().heapTotal / 1024 / 1024).toFixed(2)} MB`,
         heapUsed: `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`
