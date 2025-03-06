@@ -1,14 +1,14 @@
 const responseMessage = {
-  SUCCESS: 'User registered successfully.',
-  USER_ALREADY_EXISTS: 'A user with this email already exists.',
-  EMAIL_ALREADY_EXISTS: 'Email is already in use.',
-  SERVER_ERROR: 'Something went wrong. Please try again later.',
-  NOT_FOUND: (entity: string) => `${entity} not found`,
-  TOO_MANY_REQUEST: 'Too many request, please try again after sometime.',
-  SIGNIN_SUCCESS: 'Signin successful.',
-  INVALID_USER: 'User not found.',
-  INVALID_CREDENTIALS: 'Incorrect email or password.',
-  SIGNOUT_SUCCESS: 'Signout successful.'
+  EMAIL_ALREADY_EXISTS: 'The provided email address is already in use.',
+  INVALID_CREDENTIALS: 'The email or password you entered is incorrect.',
+  INVALID_USER: 'User not found. Please check your details.',
+  NOT_FOUND: (entity: string) => `${entity} was not found. Please verify and try again.`,
+  SERVER_ERROR: 'An unexpected error occurred. Please try again later.',
+  SIGNIN_SUCCESS: 'You have successfully signed in.',
+  SIGNOUT_SUCCESS: 'You have successfully signed out.',
+  SUCCESS: 'User registration was successful.',
+  TOO_MANY_REQUEST: 'Too many requests detected. Please try again after some time.',
+  USER_ALREADY_EXISTS: 'A user with this email address already exists.'
 };
 
 export default responseMessage;

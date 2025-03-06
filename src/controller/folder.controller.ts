@@ -5,7 +5,10 @@ import httpError from '../utils/httpError';
 import httpResponse from '../utils/httpResponse';
 
 /**
- * Fetches the folders associated with the authenticated user.
+ * Fetches all folders associated with the authenticated user.
+ * @param req - Express request object.
+ * @param res - Express response object.
+ * @param next - Express next function for error handling.
  */
 const getFolders = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -16,7 +19,6 @@ const getFolders = async (req: Request, res: Response, next: NextFunction): Prom
     }
 
     const user = await User.findById(userId).populate('folders');
-
     if (!user) {
       return httpResponse(req, res, 404, 'User not found');
     }
@@ -28,7 +30,10 @@ const getFolders = async (req: Request, res: Response, next: NextFunction): Prom
 };
 
 /**
- * Creates a new folder and associates it with the user.
+ * Creates a new folder and associates it with the authenticated user.
+ * @param req - Express request object containing folder name in body.
+ * @param res - Express response object.
+ * @param next - Express next function for error handling.
  */
 const createFolder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -38,7 +43,6 @@ const createFolder = async (req: Request, res: Response, next: NextFunction): Pr
     if (!userId) {
       return httpResponse(req, res, 400, 'User ID is required');
     }
-
     if (!name) {
       return httpResponse(req, res, 400, 'Folder name is required');
     }
@@ -55,7 +59,6 @@ const createFolder = async (req: Request, res: Response, next: NextFunction): Pr
     await user.save();
 
     const updatedUser = await User.findById(userId).populate('folders');
-
     httpResponse(req, res, 201, 'Folder created successfully', updatedUser?.folders);
   } catch (err) {
     httpError(next, err, req, 500);
@@ -63,13 +66,16 @@ const createFolder = async (req: Request, res: Response, next: NextFunction): Pr
 };
 
 /**
- * Updates a folder by its ID.
+ * Updates a folder's name by its ID.
+ * @param req - Express request object containing folder ID and new name.
+ * @param res - Express response object.
+ * @param next - Express next function for error handling.
  */
 const updateFolder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = (req.user as { id: string })?.id;
 
-    const folderId = req.params?.id;
+    const { id: folderId } = req.params;
     const { name } = req.body as { name: string };
 
     if (!userId) {
@@ -81,30 +87,28 @@ const updateFolder = async (req: Request, res: Response, next: NextFunction): Pr
     }
 
     const folder = await Folder.findByIdAndUpdate(folderId, { name }, { new: true });
-
     if (!folder) {
       return httpResponse(req, res, 404, 'Folder not found');
     }
 
     const user = await User.findById(userId).populate('folders');
 
-    if (!user) {
-      return httpResponse(req, res, 404, 'User not found');
-    }
-
-    httpResponse(req, res, 200, 'Folder updated successfully', user.folders);
+    httpResponse(req, res, 200, 'Folder updated successfully', user?.folders);
   } catch (err) {
     httpError(next, err, req, 500);
   }
 };
 
 /**
- * Deletes a folder by its ID and removes its reference from the user.
+ * Deletes a folder by its ID and removes its reference from the user's folders.
+ * @param req - Express request object containing folder ID.
+ * @param res - Express response object.
+ * @param next - Express next function for error handling.
  */
 const deleteFolder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = (req.user as { id: string })?.id;
-    const folderId = req.params?.id;
+    const { id: folderId } = req.params;
 
     if (!userId) {
       return httpResponse(req, res, 400, 'User ID is required');
@@ -115,16 +119,12 @@ const deleteFolder = async (req: Request, res: Response, next: NextFunction): Pr
       return httpResponse(req, res, 404, 'User not found');
     }
 
-    const folderIndex = user.folders.findIndex((id) => id.toString() === folderId);
-    if (folderIndex === -1) {
-      return httpResponse(req, res, 404, 'Folder not found');
-    }
-
-    user.folders.splice(folderIndex, 1);
+    user.folders = user.folders.filter((id) => id.toString() !== folderId);
     await user.save();
     await Folder.findByIdAndDelete(folderId);
 
-    httpResponse(req, res, 200, 'Folder deleted successfully');
+    const updatedUser = await User.findById(userId).populate('folders');
+    httpResponse(req, res, 200, 'Folder deleted successfully', updatedUser?.folders);
   } catch (err) {
     httpError(next, err, req, 500);
   }

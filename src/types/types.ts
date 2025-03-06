@@ -36,6 +36,7 @@ export interface INote extends Document {
   isStarred: boolean;
   isArchived: boolean;
   isDeleted: boolean;
+  folderId: Types.ObjectId;
 }
 
 /**
@@ -44,7 +45,6 @@ export interface INote extends Document {
 export interface IFolder extends Document {
   _id: Types.ObjectId;
   name: string;
-  notes: Types.ObjectId[];
 }
 
 /**
@@ -55,5 +55,6 @@ export interface IUser extends Document {
   username: string;
   email: string;
   password: string;
+  notes: Types.ObjectId[];
   folders: Types.ObjectId[];
 }

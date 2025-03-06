@@ -1,14 +1,30 @@
 import { model, Schema } from 'mongoose';
 import { IFolder } from '../types/types';
 
-const folderSchema = new Schema(
+/**
+ * Mongoose schema definition for the Folder model.
+ * Represents a folder entity that contains user-organized notes or files.
+ */
+const folderSchema = new Schema<IFolder>(
   {
-    name: { type: String, required: true },
-    notes: [{ type: Schema.Types.ObjectId, ref: 'Note' }]
+    /**
+     * The name of the folder.
+     * This field is required and must be a string.
+     */
+    name: { type: String, required: true }
   },
-  { timestamps: true }
+  {
+    /**
+     * Automatically adds `createdAt` and `updatedAt` timestamps to the document.
+     */
+    timestamps: true
+  }
 );
 
+/**
+ * Folder model based on the defined schema.
+ * This model allows performing CRUD operations on the `folders` collection.
+ */
 const Folder = model<IFolder>('Folder', folderSchema);
 
 export default Folder;
