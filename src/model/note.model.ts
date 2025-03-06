@@ -1,13 +1,5 @@
 import { model, Schema } from 'mongoose';
-
-export interface INote extends Document {
-  title: string;
-  content: string;
-  isPinned: boolean;
-  isStarred: boolean;
-  isArchived: boolean;
-  isDeleted: boolean;
-}
+import { INote } from '../types/types';
 
 const noteSchema = new Schema(
   {

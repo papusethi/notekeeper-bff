@@ -1,7 +1,8 @@
 import bcryptjs from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import responseMessage from '../constant/responseMessage';
-import User, { IUser } from '../model/user.model';
+import User from '../model/user.model';
+import { IUser } from '../types/types';
 import httpError from '../utils/httpError';
 import httpResponse from '../utils/httpResponse';
 import jwtToken from '../utils/jwtToken';
@@ -35,7 +36,7 @@ const signup = async (req: Request, res: Response, next: NextFunction): Promise<
     });
 
     const userData = {
-      _id: newUser._id,
+      id: newUser._id,
       username: newUser.username,
       email: newUser.email
     };
@@ -84,7 +85,7 @@ const signin = async (req: Request, res: Response, next: NextFunction): Promise<
     const { password: _, ...restUser } = foundUser.toObject();
 
     const userData = {
-      _id: restUser._id,
+      id: restUser._id,
       username: restUser.username,
       email: restUser.email
     };

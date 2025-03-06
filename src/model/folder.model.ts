@@ -1,14 +1,10 @@
-import mongoose, { model, Schema } from 'mongoose';
-
-export interface IFolder extends Document {
-  name: string;
-  notes: mongoose.Types.ObjectId[];
-}
+import { model, Schema } from 'mongoose';
+import { IFolder } from '../types/types';
 
 const folderSchema = new Schema(
   {
-    name: { type: String, required: true, unique: true },
-    notes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Note' }]
+    name: { type: String, required: true },
+    notes: [{ type: Schema.Types.ObjectId, ref: 'Note' }]
   },
   { timestamps: true }
 );
