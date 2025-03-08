@@ -22,24 +22,16 @@ const signup = async (req: Request, res: Response, next: NextFunction): Promise<
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return httpResponse(req, res, 400, responseMessage.USER_ALREADY_EXISTS);
+      return httpError(next, new Error(responseMessage.USER_ALREADY_EXISTS), req, 400);
     }
 
     // Hash the password
     const hashedPassword = await bcryptjs.hash(password, 10);
 
     // Create a new user
-    const newUser: IUser = await User.create({
-      username,
-      email,
-      password: hashedPassword
-    });
+    const newUser: IUser = await User.create({ username, email, password: hashedPassword });
 
-    const userData = {
-      id: newUser._id,
-      username: newUser.username,
-      email: newUser.email
-    };
+    const userData = { id: newUser._id, username: newUser.username, email: newUser.email };
 
     // Generate JWT token
     const token = jwtToken.generateToken(userData);
@@ -49,7 +41,7 @@ const signup = async (req: Request, res: Response, next: NextFunction): Promise<
   } catch (err) {
     // Handle duplicate key error (MongoDB error code 11000)
     if ((err as { code: number })?.code === 11000) {
-      return httpResponse(req, res, 400, responseMessage.EMAIL_ALREADY_EXISTS);
+      return httpError(next, new Error(responseMessage.EMAIL_ALREADY_EXISTS), req, 400);
     }
     httpError(next, err, req, 500);
   }
@@ -84,11 +76,7 @@ const signin = async (req: Request, res: Response, next: NextFunction): Promise<
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...restUser } = foundUser.toObject();
 
-    const userData = {
-      id: restUser._id,
-      username: restUser.username,
-      email: restUser.email
-    };
+    const userData = { id: restUser._id, username: restUser.username, email: restUser.email };
 
     // Generate JWT token
     const token = jwtToken.generateToken(userData);

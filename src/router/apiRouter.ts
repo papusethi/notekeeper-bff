@@ -3,6 +3,7 @@ import apiController from '../controller/apiController';
 import authController from '../controller/auth.controller';
 import folderController from '../controller/folder.controller';
 import noteController from '../controller/note.controller';
+import userController from '../controller/user.controller';
 import { authenticateUser } from '../middleware/authenticateUser';
 // import rateLimit from '../middleware/rateLimit';
 
@@ -16,6 +17,10 @@ router.route('/health').get(apiController.health);
 router.post('/auth/signup', authController.signup);
 router.post('/auth/signin', authController.signin);
 router.get('/auth/signout', authController.signOut);
+
+// User router
+router.put('/user/:id', authenticateUser, userController.updateUser);
+router.delete('/user/:id', authenticateUser, userController.deleteUser);
 
 // Folder router
 router.get('/folders', authenticateUser, folderController.getFolders);

@@ -14,7 +14,7 @@ app.use(helmet());
 app.use(
   cors({
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-    origin: ['https://client.com'], // For client applicaiton
+    origin: ['http://localhost:5173'], // For client applicaiton
     credentials: true // For cookies
   })
 );

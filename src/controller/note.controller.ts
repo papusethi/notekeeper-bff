@@ -13,15 +13,15 @@ import httpResponse from '../utils/httpResponse';
  */
 const getNotes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const userId = (req.user as { id: string })?.id;
+    const userId: string | undefined = (req.user as { id: string })?.id;
 
     if (!userId) {
-      return httpResponse(req, res, 400, 'User ID is missing');
+      return httpError(next, new Error('User ID is missing'), req, 400);
     }
 
     const user = await User.findById(userId).populate('notes');
     if (!user) {
-      return httpResponse(req, res, 404, 'User not found');
+      return httpError(next, new Error('User not found'), req, 404);
     }
 
     httpResponse(req, res, 200, 'Notes fetched successfully', user.notes);
@@ -38,21 +38,19 @@ const getNotes = async (req: Request, res: Response, next: NextFunction): Promis
  */
 const createNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const userId = (req.user as { id: string })?.id;
-    const { title, content, isPinned, isStarred, isArchived, isDeleted, folderId } = req.body as INote;
+    const userId: string | undefined = (req.user as { id: string })?.id;
+    const { title, content, isPinned, isStarred, isArchived, isDeleted, folderId }: INote = req.body as INote;
 
     if (!userId) {
-      return httpResponse(req, res, 400, 'User ID is required');
+      return httpError(next, new Error('User ID is missing'), req, 400);
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return httpResponse(req, res, 404, 'User not found');
+      return httpError(next, new Error('User not found'), req, 404);
     }
 
-    const noteData = { title, content, isPinned, isStarred, isArchived, isDeleted, folderId };
-
-    const note = new Note(noteData);
+    const note = new Note({ title, content, isPinned, isStarred, isArchived, isDeleted, folderId });
     await note.save();
 
     user.notes.push(note._id);
@@ -73,24 +71,20 @@ const createNote = async (req: Request, res: Response, next: NextFunction): Prom
  */
 const updateNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const userId = (req.user as { id: string })?.id;
-
+    const userId: string | undefined = (req.user as { id: string })?.id;
     const { id: noteId } = req.params;
-    const { title, content, isPinned, isStarred, isArchived, isDeleted, folderId } = req.body as INote;
+    const { title, content, isPinned, isStarred, isArchived, isDeleted, folderId }: INote = req.body as INote;
 
     if (!userId) {
-      return httpResponse(req, res, 400, 'User ID is required');
+      return httpError(next, new Error('User ID is missing'), req, 400);
     }
 
-    const noteData = { title, content, isPinned, isStarred, isArchived, isDeleted, folderId };
-
-    const note = await Note.findByIdAndUpdate(noteId, noteData, { new: true });
+    const note = await Note.findByIdAndUpdate(noteId, { title, content, isPinned, isStarred, isArchived, isDeleted, folderId }, { new: true });
     if (!note) {
-      return httpResponse(req, res, 404, 'Note not found');
+      return httpError(next, new Error('Note not found'), req, 404);
     }
 
     const user = await User.findById(userId).populate('notes');
-
     httpResponse(req, res, 200, 'Note updated successfully', user?.notes);
   } catch (err) {
     httpError(next, err, req, 500);
@@ -105,16 +99,16 @@ const updateNote = async (req: Request, res: Response, next: NextFunction): Prom
  */
 const deleteNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const userId = (req.user as { id: string })?.id;
+    const userId: string | undefined = (req.user as { id: string })?.id;
     const { id: noteId } = req.params;
 
     if (!userId) {
-      return httpResponse(req, res, 400, 'User ID is required');
+      return httpError(next, new Error('User ID is missing'), req, 400);
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return httpResponse(req, res, 404, 'User not found');
+      return httpError(next, new Error('User not found'), req, 404);
     }
 
     user.notes = user.notes.filter((id) => id.toString() !== noteId);

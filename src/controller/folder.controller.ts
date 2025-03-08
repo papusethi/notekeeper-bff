@@ -12,15 +12,15 @@ import httpResponse from '../utils/httpResponse';
  */
 const getFolders = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const userId = (req.user as { id: string })?.id;
+    const userId: string | undefined = (req.user as { id: string })?.id;
 
     if (!userId) {
-      return httpResponse(req, res, 400, 'User ID is missing');
+      return httpError(next, new Error('User ID is missing'), req, 400);
     }
 
     const user = await User.findById(userId).populate('folders');
     if (!user) {
-      return httpResponse(req, res, 404, 'User not found');
+      return httpError(next, new Error('User not found'), req, 404);
     }
 
     httpResponse(req, res, 200, 'Folders fetched successfully', user.folders);
@@ -37,19 +37,19 @@ const getFolders = async (req: Request, res: Response, next: NextFunction): Prom
  */
 const createFolder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const userId = (req.user as { id: string })?.id;
+    const userId: string | undefined = (req.user as { id: string })?.id;
     const { name } = req.body as { name: string };
 
     if (!userId) {
-      return httpResponse(req, res, 400, 'User ID is required');
+      return httpError(next, new Error('User ID is missing'), req, 400);
     }
     if (!name) {
-      return httpResponse(req, res, 400, 'Folder name is required');
+      return httpError(next, new Error('Folder name is required'), req, 400);
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return httpResponse(req, res, 404, 'User not found');
+      return httpError(next, new Error('User not found'), req, 404);
     }
 
     const folder = new Folder({ name });
@@ -73,26 +73,23 @@ const createFolder = async (req: Request, res: Response, next: NextFunction): Pr
  */
 const updateFolder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const userId = (req.user as { id: string })?.id;
-
+    const userId: string | undefined = (req.user as { id: string })?.id;
     const { id: folderId } = req.params;
     const { name } = req.body as { name: string };
 
     if (!userId) {
-      return httpResponse(req, res, 400, 'User ID is required');
+      return httpError(next, new Error('User ID is missing'), req, 400);
     }
-
     if (!name) {
-      return httpResponse(req, res, 400, 'Folder name is required');
+      return httpError(next, new Error('Folder name is required'), req, 400);
     }
 
     const folder = await Folder.findByIdAndUpdate(folderId, { name }, { new: true });
     if (!folder) {
-      return httpResponse(req, res, 404, 'Folder not found');
+      return httpError(next, new Error('Folder not found'), req, 404);
     }
 
     const user = await User.findById(userId).populate('folders');
-
     httpResponse(req, res, 200, 'Folder updated successfully', user?.folders);
   } catch (err) {
     httpError(next, err, req, 500);
@@ -107,16 +104,16 @@ const updateFolder = async (req: Request, res: Response, next: NextFunction): Pr
  */
 const deleteFolder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const userId = (req.user as { id: string })?.id;
+    const userId: string | undefined = (req.user as { id: string })?.id;
     const { id: folderId } = req.params;
 
     if (!userId) {
-      return httpResponse(req, res, 400, 'User ID is required');
+      return httpError(next, new Error('User ID is missing'), req, 400);
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return httpResponse(req, res, 404, 'User not found');
+      return httpError(next, new Error('User not found'), req, 404);
     }
 
     user.folders = user.folders.filter((id) => id.toString() !== folderId);
